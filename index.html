@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Calculator</title>
+    <meta name="description" content="Calculate your exact age in years, months, and days. Fast, free, and mobile-friendly Age 	Calculator with fun aging themes and emojis.">
+    <meta name="keywords" content="age calculator, calculate age, birth date calculator, online age tool, age in months and days">
+    <meta name="author" content="Your Name/Brand">
+
+    <meta property="og:title" content="Smart Age Calculator - Find Your Exact Age">
+    <meta property="og:description" content="Check your age with our interactive calculator. See how you've grown with fun themes!">
+    <meta property="og:type" content="website">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background 0.5s ease;
+            background-color: #f0f4f8;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 420px;
+            border-top: 12px solid #673ab7;
+        }
+
+        #avatar { font-size: 70px; display: block; margin-bottom: 10px; }
+        h1 { font-size: 24px; color: #333; margin-bottom: 25px; }
+
+        .date-input-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .input-field { flex: 1; }
+        .input-field label { display: block; font-size: 12px; color: #70757a; margin-bottom: 5px; text-transform: uppercase; }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 0;
+            font-size: 20px;
+            border: none;
+            border-bottom: 2px solid #dadce0;
+            outline: none;
+            text-align: center;
+            background: transparent;
+        }
+
+        input[type="number"]:focus { border-bottom: 2px solid #673ab7; }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        button {
+            background-color: #673ab7;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover { background-color: #512da8; }
+
+        #result {
+            margin-top: 25px;
+            text-align: left;
+            font-size: 16px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            color: #444;
+            line-height: 1.8;
+        }
+
+        .stat-line { margin-bottom: 8px; font-weight: 500; }
+        .stat-line span { color: #673ab7; font-weight: bold; }
+
+        .theme-baby { background-color: #e1f5fe !important; }
+        .theme-teen { background-color: #f3e5f5 !important; }
+        .theme-adult { background-color: #e8f5e9 !important; }
+        .theme-old { background-color: #fff3e0 !important; }
+        .theme-grand { background-color: #efebe9 !important; }
+    </style>
+</head>
+<body id="bodyTag">
+
+<div class="container" id="mainCard">
+    <span id="avatar">🎂</span>
+    <h1>Age Calculator</h1>
+    
+    <div class="date-input-container">
+        <div class="input-field">
+            <label>Day</label>
+            <input type="number" id="day" placeholder="DD" min="1" max="31" required oninput="autoFocus(this, 'month', 2)">
+        </div>
+        <div class="input-field">
+            <label>Month</label>
+            <input type="number" id="month" placeholder="MM" min="1" max="12" required oninput="autoFocus(this, 'year', 2)">
+        </div>
+        <div class="input-field" style="flex: 1.5;">
+            <label>Year</label>
+            <input type="number" id="year" placeholder="YYYY" min="1000" max="9999" required oninput="autoFocus(this, '', 4)">
+        </div>
+    </div>
+    
+    <button onclick="calculateAge()">Calculate Age</button>
+    
+    <div id="result">Enter your birth date...</div>
+</div>
+
+<script>
+    function autoFocus(current, nextID, maxDigits) {
+        let val = current.value;
+        const dInput = document.getElementById('day');
+        const mInput = document.getElementById('month');
+        const yInput = document.getElementById('year');
+
+        // १. अंकांची संख्या मर्यादित करणे
+        if (val.length > maxDigits) {
+            val = val.slice(0, maxDigits);
+        }
+
+        // २. महिना १२ पेक्षा जास्त नसावा
+        if (current.id === 'month' && parseInt(val) > 12) {
+            val = "12";
+        }
+
+        current.value = val;
+
+        // ३. लीप वर्ष आणि फेब्रुवारीचे विशेष लॉजिक
+        const m = parseInt(mInput.value);
+        const y = parseInt(yInput.value);
+        const d = parseInt(dInput.value);
+
+        if (m === 2) {
+            // लीप वर्षाचे गणित: (४ ने भाग जातो AND १०० ने जात नाही) OR (४०० ने भाग जातो)
+            const isLeap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+            const maxDays = isLeap ? 29 : 28;
+            
+            if (d > maxDays) {
+                dInput.value = maxDays;
+            }
+        } else if ([4, 6, 9, 11].includes(m)) {
+            // ३० दिवसांचे महिने
+            if (d > 30) dInput.value = "30";
+        } else {
+            // ३१ दिवसांचे महिने
+            if (d > 31) dInput.value = "31";
+        }
+
+        // ४. पुढच्या बॉक्सवर जाणे
+        if (val.length === maxDigits && nextID) {
+            document.getElementById(nextID).focus();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') calculateAge();
+    });
+
+    function calculateAge() {
+        const d = parseInt(document.getElementById('day').value);
+        const m = parseInt(document.getElementById('month').value);
+        const yStr = document.getElementById('year').value;
+        const y = parseInt(yStr);
+        const resultElement = document.getElementById('result');
+
+        if (!d || !m || yStr.length !== 4) {
+            resultElement.innerHTML = "<span style='color:#d93025'>Please enter a valid date!</span>";
+            return;
+        }
+
+        const birthDate = new Date(y, m - 1, d);
+        const now = new Date();
+
+        if (birthDate > now) {
+            resultElement.innerHTML = "<span style='color:#d93025'>Birth date cannot be in the future!</span>";
+            return;
+        }
+
+        let years = now.getFullYear() - birthDate.getFullYear();
+        let months = now.getMonth() - birthDate.getMonth();
+        let days = now.getDate() - birthDate.getDate();
+
+        if (days < 0) {
+            months--;
+            days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        const diffMs = now - birthDate;
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        const totalHours = Math.floor(totalMinutes / 60);
+        const totalDays = Math.floor(totalHours / 24);
+        const totalWeeks = Math.floor(totalDays / 7);
+        const totalMonths = (years * 12) + months;
+
+        updateVisuals(years);
+
+        resultElement.innerHTML = `
+            <div class="stat-line">Age: <span>${years} years ${months} months ${days} days</span></div>
+            <div class="stat-line">or <span>${totalMonths.toLocaleString()} months ${days} days</span></div>
+            <div class="stat-line">or <span>${totalWeeks.toLocaleString()} weeks ${totalDays % 7} days</span></div>
+            <div class="stat-line">or <span>${totalDays.toLocaleString()} days</span></div>
+            <div class="stat-line">or <span>${totalHours.toLocaleString()} hours</span></div>
+            <div class="stat-line">or <span>${totalMinutes.toLocaleString()} minutes</span></div>
+            <div class="stat-line">or <span>${totalSeconds.toLocaleString()} seconds</span></div>
+        `;
+    }
+
+    function updateVisuals(age) {
+        const body = document.getElementById('bodyTag');
+        const card = document.getElementById('mainCard');
+        const avatar = document.getElementById('avatar');
+        body.className = "";
+
+        if (age < 7) {
+            body.classList.add('theme-baby'); card.style.borderTopColor = "#03a9f4"; avatar.innerText = "👶";
+        } else if (age <= 20) {
+            body.classList.add('theme-teen'); card.style.borderTopColor = "#9c27b0"; avatar.innerText = "👦";
+        } else if (age <= 40) {
+            body.classList.add('theme-adult'); card.style.borderTopColor = "#4caf50"; avatar.innerText = "🧑";
+        } else if (age <= 60) {
+            body.classList.add('theme-old'); card.style.borderTopColor = "#ff9800"; avatar.innerText = "🧔";
+        } else {
+            body.classList.add('theme-grand'); card.style.borderTopColor = "#795548"; avatar.innerText = "👴";
+        }
+    }
+</script>
+</body>
+</html>
